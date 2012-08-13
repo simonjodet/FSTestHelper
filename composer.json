@@ -1,0 +1,13 @@
+{
+    "name":"simonjodet/fstesthelper",
+    "version":"1.0.0",
+    "license":"MIT",
+    "authors":[
+        {
+            "name":"Simon Jode",
+            "email":"simon@jodet.com",
+            "homepage":"https://github.com/simonjodet/",
+            "role": "Developer"
+        }
+    ]
+}
