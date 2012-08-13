@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
+require_once __DIR__ . '/../FSTestHelper.php';
 
 class FSTestHelperTest extends \PHPUnit_Framework_TestCase
 {
