@@ -7,7 +7,12 @@
             "name":"Simon Jode",
             "email":"simon@jodet.com",
             "homepage":"https://github.com/simonjodet/",
-            "role": "Developer"
+            "role":"Developer"
         }
-    ]
+    ],
+    "autoload":{
+        "psr-0":{
+            "FSTestHelper":"."
+        }
+    }
 }
