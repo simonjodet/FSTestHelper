@@ -32,6 +32,7 @@ class FSTestHelper
     public function __construct()
     {
         $this->systemTempFolder = realpath(sys_get_temp_dir());
+        $this->temporaryPath = $this->generateUniqueTemporaryPath();
     }
 
     /**

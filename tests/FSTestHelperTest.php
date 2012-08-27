@@ -4,6 +4,13 @@ require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
 
 class FSTestHelperTest extends \PHPUnit_Framework_TestCase
 {
+    public function test___construct_uses_system_temp_folder_and_sets_temp_path()
+    {
+        $systemTempFolder = realpath(sys_get_temp_dir());
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $this->assertStringStartsWith($systemTempFolder, $FSTestHelper->getTemporaryPath());
+    }
+
     public function test_createTree_requires_an_array()
     {
         $this->setExpectedException('\FSTestHelper\Exception', 'Malformed array passed to FSTestHelper::createTree()');
