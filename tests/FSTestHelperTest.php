@@ -52,10 +52,10 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         );
         $temporaryPath = $FSTestHelper->getTemporaryPath();
 
-        $this->assertFileExists($temporaryPath.'/some_folder');
-        $this->assertFileExists($temporaryPath.'/other_folder');
-        $this->assertStringEqualsFile($temporaryPath.'/some_file', 'content');
-        $this->assertStringEqualsFile($temporaryPath.'/test/other_file', 'content');
+        $this->assertFileExists($temporaryPath . '/some_folder');
+        $this->assertFileExists($temporaryPath . '/other_folder');
+        $this->assertStringEqualsFile($temporaryPath . '/some_file', 'content');
+        $this->assertStringEqualsFile($temporaryPath . '/test/other_file', 'content');
     }
 
 
@@ -155,5 +155,76 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertFileNotExists($path1);
         $this->assertFileNotExists($path2);
     }
+
+    public function test___toString_method_returns_the_temporary_path()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+
+        $this->assertEquals($FSTestHelper->getTemporaryPath(), strval($FSTestHelper));
+    }
+
+    public function test_createTreeFromJson_creates_the_tree_correctly()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->createTreeFromJson('
+        {
+            "folders":[
+                "some_folder",
+                "other_folder"
+            ],
+            "files":[
+                {
+                    "path":"some_file",
+                    "content":"content"
+                },
+                {
+                    "path":"test/other_file",
+                    "content":"content"
+                }
+            ]
+        }
+        ');
+        $temporaryPath = $FSTestHelper->getTemporaryPath();
+
+        $this->assertFileExists($temporaryPath . '/some_folder');
+        $this->assertFileExists($temporaryPath . '/other_folder');
+        $this->assertStringEqualsFile($temporaryPath . '/some_file', 'content');
+        $this->assertStringEqualsFile($temporaryPath . '/test/other_file', 'content');
+    }
+
+    public function test_createTreeFromJson_throws_an_exception_if_passed_invalid_JSON()
+    {
+        $this->setExpectedException(
+            'FSTestHelper\Exception', 'Invalid JSON'
+        );
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->createTreeFromJson('invalid json');
+    }
+
+    public function test_importFolderTree_returns_the_correct_JSON_object()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $tree = array(
+            'folders' => array(
+                'other_folder',
+                'some_folder'
+            ),
+            'files' => array(
+                array(
+                    'path' => 'some_file',
+                    'content' => 'content'
+                ),
+                array(
+                    'path' => 'test/other_file',
+                    'content' => 'content'
+                )
+            )
+        );
+        $FSTestHelper->createTree($tree);
+        $temporaryPath = $FSTestHelper->getTemporaryPath();
+
+        $this->assertEquals($tree, json_decode($FSTestHelper->importFolderTree($temporaryPath), true));
+    }
+
 }
 

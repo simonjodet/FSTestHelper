@@ -21,6 +21,12 @@ class FSTestHelper
     private $temporaryPath;
 
     /**
+     * Data container during import
+     * @var array
+     */
+    private $importData = array();
+
+    /**
      * Constructor - Get the system temp folder
      */
     public function __construct()
@@ -37,6 +43,15 @@ class FSTestHelper
         {
             $this->deleteFolder($this->temporaryPath);
         }
+    }
+
+    /**
+     * String serialization return the temporary path
+     * @return string The temporary path
+     */
+    public function __toString()
+    {
+        return strval($this->getTemporaryPath());
     }
 
     /**
@@ -83,6 +98,21 @@ class FSTestHelper
         {
             $this->createFile($file);
         }
+    }
+
+    /**
+     * @param $json JSON object representing the tree
+     *
+     * @throws Exception
+     */public function createTreeFromJson($json)
+    {
+        $tree = json_decode($json, true);
+        if (json_last_error() != JSON_ERROR_NONE)
+        {
+            throw new Exception('Invalid JSON');
+        }
+
+        $this->createTree($tree);
     }
 
     /**
@@ -152,6 +182,54 @@ class FSTestHelper
     }
 
     /**
+     * Create a JSON object of a real folder tree
+     * @param string $location
+     * @return string JSON object
+     */public function importFolderTree($location)
+    {
+        $this->importData['location'] = $location;
+        $this->importData['folders'] = array();
+        $this->importData['files'] = array();
+        $this->listFiles($location);
+        return json_encode(array(
+            'folders' => $this->importData['folders'],
+            'files' => $this->importData['files']
+        ));
+    }
+
+    /**
+     * Recursive listing method used for import
+     * @param $location
+     */private function listFiles($location)
+    {
+        $files = array();
+        $items = glob($location . '/*');
+        if (is_array($items) && count($items) > 0)
+        {
+            foreach ($items as $item)
+            {
+                if (is_dir($item))
+                {
+                    $this->listFiles($item);
+                }
+                else
+                {
+                    $this->importData['files'][] = array(
+                        'path' => ltrim(str_replace(realpath($this->importData['location']), '', realpath($item)), DIRECTORY_SEPARATOR),
+                        'content' => file_get_contents(realpath($item))
+                    );
+                }
+            }
+        }
+        else {
+            if (realpath($location) != realpath($this->importData['location']))
+            {
+                $this->importData['folders'][] = ltrim(str_replace(realpath($this->importData['location']), '', realpath($location)), DIRECTORY_SEPARATOR);
+            }
+        }
+    }
+
+    /**
      * @return string Get the generated temporary path
      */
     public function getTemporaryPath()
@@ -185,7 +263,6 @@ class FSTestHelper
         }
         rmdir($path);
     }
-
 }
 
 /**
