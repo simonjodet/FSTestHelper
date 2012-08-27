@@ -233,5 +233,33 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($tree, json_decode($FSTestHelper->importFolderTree($temporaryPath), true));
     }
 
+    public function test_cloneTree_duplicates_the_tree_correctly()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $tree = array(
+            'folders' => array(
+                'other_folder',
+                'some_folder'
+            ),
+            'files' => array(
+                array(
+                    'path' => 'some_file',
+                    'content' => 'content'
+                ),
+                array(
+                    'path' => 'test/other_file',
+                    'content' => 'content'
+                )
+            )
+        );
+        $FSTestHelper->createTree($tree);
+        $temporaryPath = $FSTestHelper->getTemporaryPath();
+
+        $FSTestHelper2 = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper2->cloneTree($temporaryPath);
+
+        $this->assertEquals($tree, json_decode($FSTestHelper2->importFolderTree($FSTestHelper2->getTemporaryPath()), true));
+    }
+
 }
 

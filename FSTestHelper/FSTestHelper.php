@@ -105,7 +105,8 @@ class FSTestHelper
      * @param $json JSON object representing the tree
      *
      * @throws Exception
-     */public function createTreeFromJson($json)
+     */
+    public function createTreeFromJson($json)
     {
         $tree = json_decode($json, true);
         if (json_last_error() != JSON_ERROR_NONE)
@@ -148,6 +149,43 @@ class FSTestHelper
     }
 
     /**
+     * Create a JSON object of a real folder tree
+     *
+     * @param string $location
+     *
+     * @return string JSON object
+     */
+    public function importFolderTree($location)
+    {
+        $this->importData['location'] = $location;
+        $this->importData['folders'] = array();
+        $this->importData['files'] = array();
+        $this->listFiles($location);
+        return json_encode(array(
+            'folders' => $this->importData['folders'],
+            'files' => $this->importData['files']
+        ));
+    }
+
+
+    /**
+     * Cloning existing tree to temporary path
+     *
+     * @param $location
+     */
+    public function cloneTree($location)
+    {
+        $this->importData['location'] = $location;
+        $this->importData['folders'] = array();
+        $this->importData['files'] = array();
+        $this->listFiles($location);
+        $this->createTree(array(
+            'folders' => $this->importData['folders'],
+            'files' => $this->importData['files']
+        ));
+    }
+
+    /**
      * Create a file
      *
      * Example:
@@ -183,25 +221,11 @@ class FSTestHelper
     }
 
     /**
-     * Create a JSON object of a real folder tree
-     * @param string $location
-     * @return string JSON object
-     */public function importFolderTree($location)
-    {
-        $this->importData['location'] = $location;
-        $this->importData['folders'] = array();
-        $this->importData['files'] = array();
-        $this->listFiles($location);
-        return json_encode(array(
-            'folders' => $this->importData['folders'],
-            'files' => $this->importData['files']
-        ));
-    }
-
-    /**
      * Recursive listing method used for import
+     *
      * @param $location
-     */private function listFiles($location)
+     */
+    private function listFiles($location)
     {
         $files = array();
         $items = glob($location . '/*');
@@ -222,7 +246,8 @@ class FSTestHelper
                 }
             }
         }
-        else {
+        else
+        {
             if (realpath($location) != realpath($this->importData['location']))
             {
                 $this->importData['folders'][] = ltrim(str_replace(realpath($this->importData['location']), '', realpath($location)), DIRECTORY_SEPARATOR);
