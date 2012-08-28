@@ -261,5 +261,27 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($tree, json_decode($FSTestHelper2->importFolderTree($FSTestHelper2->getTemporaryPath()), true));
     }
 
+    public function test_deleteFolder_deletes_all_files_and_folders()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->createFile(
+            array(
+                'path' => 'path/some_name',
+                'content' => 'some_content'
+            )
+        );
+        $FSTestHelper->createFile(
+            array(
+                'path' => 'path/path/some_name',
+                'content' => 'some_content'
+            )
+        );
+
+        $FSTestHelper->deleteFolder('/path');
+
+        $this->assertFileNotExists('/path/some_name');
+        $this->assertFileNotExists('/path');
+    }
+
 }
 

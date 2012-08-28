@@ -42,7 +42,7 @@ class FSTestHelper
     {
         if (!is_null($this->temporaryPath))
         {
-            $this->deleteFolder($this->temporaryPath);
+            $this->deleteFolder('');
         }
     }
 
@@ -272,10 +272,16 @@ class FSTestHelper
     }
 
     /**
+     * Recursively deletes the given folder
+     *
      * @param $path
      */
-    private function deleteFolder($path)
+    public function deleteFolder($path)
     {
+        if (strpos(realpath($path), realpath($this->getTemporaryPath())) !== 0)
+        {
+            $path = $this->getTemporaryPath() . '/' . $path;
+        }
         foreach (glob($path . '/*') as $file)
         {
             if (is_dir($file))
