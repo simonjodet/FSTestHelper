@@ -1,0 +1,5 @@
+<testsuites>
+    <testsuite name="Gumdrop">
+        <directory>tests</directory>
+    </testsuite>
+</testsuites>

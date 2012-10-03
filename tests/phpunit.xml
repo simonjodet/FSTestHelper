@@ -1,6 +1,0 @@
-<testsuites>
-    <testsuite name="Gumdrop">
-        <directory>.</directory>
-        <!--<exclude>TestCase.php</exclude>-->
-    </testsuite>
-</testsuites>
