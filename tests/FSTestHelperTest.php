@@ -206,5 +206,11 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
 
+    public function test___toString_returns_the_path()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $this->assertEquals($FSTestHelper->getPath(), strval($FSTestHelper));
+    }
+
 }
 

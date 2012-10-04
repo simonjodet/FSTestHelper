@@ -30,6 +30,11 @@ class FSTestHelper
         $this->delete($this->path);
     }
 
+    public function __toString()
+    {
+        return $this->path;
+    }
+
     public function getPath()
     {
         return $this->path;
