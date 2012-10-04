@@ -102,7 +102,10 @@ class FSTestHelper
             }
             else
             {
-                copy($item, $destination . '/' . $relative_path);
+                if (realpath($item) != '')
+                {
+                    copy($item, $destination . '/' . $relative_path);
+                }
             }
         }
     }
