@@ -29,7 +29,7 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals($path1, $path2);
     }
 
-    public function test_deleteFolder_deletes_files()
+    public function test_delete_deletes_files()
     {
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
         $path = $FSTestHelper->getPath();
@@ -43,5 +43,30 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertFileNotExists($path . '/file2');
     }
 
+    public function test_delete_deletes_folders()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder2');
+
+        $FSTestHelper->delete('/folder1');
+        $FSTestHelper->delete('/folder2');
+
+        $this->assertFileNotExists($path . '/folder1');
+        $this->assertFileNotExists($path . '/folder2');
+    }
+
+    public function test_delete_is_silent_if_given_path_does_not_exist()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+
+        $FSTestHelper->delete('/folder1');
+        $FSTestHelper->delete('/file1');
+
+        $this->assertFileNotExists($path . '/folder1');
+        $this->assertFileNotExists($path . '/file1');
+    }
 }
 

@@ -32,7 +32,17 @@ class FSTestHelper
 
     public function delete($path)
     {
-        unlink($this->path . $path);
+        if (file_exists($this->path . $path))
+        {
+            if (is_dir($this->path . $path))
+            {
+                rmdir($this->path . $path);
+            }
+            else
+            {
+                unlink($this->path . $path);
+            }
+        }
     }
 
     private function generateTemporaryPath($i)
