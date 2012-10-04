@@ -25,6 +25,11 @@ class FSTestHelper
         mkdir($this->path);
     }
 
+    public function __destruct()
+    {
+        $this->delete($this->path);
+    }
+
     public function getPath()
     {
         return $this->path;
