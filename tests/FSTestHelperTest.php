@@ -4,7 +4,6 @@ require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
 
 
 /**
- * TODO: Add a method that recursively deletes a folder
  * TODO: Destructor should delete the test folder
  * TODO: Add a method that recursively create a path
  * TODO: Add a method that recursively lists folders and files
@@ -67,6 +66,21 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileNotExists($path . '/folder1');
         $this->assertFileNotExists($path . '/file1');
+    }
+
+    public function test_delete_empties_folders_before_deleting_them()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder1/folder2');
+        touch($path . '/folder1/file1');
+        touch($path . '/folder1/folder2/file2');
+
+        $FSTestHelper->delete('/folder1');
+
+        $this->assertFileNotExists($path . '/folder1');
+        $this->assertFileNotExists($path . '/folder1/file1');
     }
 }
 

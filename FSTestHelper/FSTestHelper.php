@@ -32,11 +32,25 @@ class FSTestHelper
 
     public function delete($path)
     {
-        $path = $this->path . $path;
+        if (strpos(realpath($path), realpath($this->path)) !== 0)
+        {
+            $path = $this->path . '/' . $path;
+        }
         if (file_exists($path))
         {
             if (is_dir($path))
             {
+                foreach (glob($path . '/*') as $item)
+                {
+                    if (is_dir($item))
+                    {
+                        $this->delete($item);
+                    }
+                    else
+                    {
+                        unlink($item);
+                    }
+                }
                 rmdir($path);
             }
             else
