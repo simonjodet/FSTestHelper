@@ -155,14 +155,14 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
                         'content' => 'content'
                     ),
                     array(
-                        'path' => 'some_other_file',
+                        'path' => 'folder1/folder2/some_other_file',
                         'content' => 'other_content'
                     )
                 )
             )
         );
         $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_file', 'content');
-        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_other_file', 'other_content');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
 }
 

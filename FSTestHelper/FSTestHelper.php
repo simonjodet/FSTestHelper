@@ -111,6 +111,11 @@ class FSTestHelper
     {
         foreach ($items['files'] as $file)
         {
+            $pathinfo = pathinfo($file['path']);
+            if ($pathinfo['dirname'] != '.')
+            {
+                mkdir($this->path . '/' . $pathinfo['dirname'], 0777, true);
+            }
             file_put_contents($this->getPath() . '/' . $file['path'], $file['content']);
         }
     }
