@@ -2,11 +2,6 @@
 
 require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
 
-
-/**
- * TODO: Add a method that recursively creates a path
- * TODO: Add a method that creates folders and files based on an array or JSON string to a specified location
- */
 class FSTestHelperTest extends \PHPUnit_Framework_TestCase
 {
     public function test_constructor_returns_a_temporary_folder_in_the_system_temporary_folder()
@@ -180,6 +175,35 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($FSTestHelper->getPath() . '/folder1');
         $this->assertFileExists($FSTestHelper->getPath() . '/folder2');
         $this->assertFileExists($FSTestHelper->getPath() . '/folder2/folder3');
+    }
+
+    public function test_create_creates_files_and_folders_at_the_same_time()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->create(
+            array(
+                'folders' => array(
+                    'folder1',
+                    'folder2',
+                    'folder2/folder3'
+                ),
+                'files' => array(
+                    array(
+                        'path' => 'some_file',
+                        'content' => 'content'
+                    ),
+                    array(
+                        'path' => 'folder1/folder2/some_other_file',
+                        'content' => 'other_content'
+                    )
+                )
+            )
+        );
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder1');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2/folder3');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_file', 'content');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
 
 }

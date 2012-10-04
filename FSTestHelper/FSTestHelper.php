@@ -114,7 +114,7 @@ class FSTestHelper
             foreach ($items['files'] as $file)
             {
                 $pathinfo = pathinfo($file['path']);
-                if ($pathinfo['dirname'] != '.')
+                if ($pathinfo['dirname'] != '.' && !file_exists($this->path . '/' . $pathinfo['dirname']))
                 {
                     mkdir($this->path . '/' . $pathinfo['dirname'], 0777, true);
                 }
@@ -125,7 +125,10 @@ class FSTestHelper
         {
             foreach ($items['folders'] as $folder)
             {
-                mkdir($this->path . '/' . $folder, 0777, true);
+                if (!file_exists($this->path . '/' . $folder))
+                {
+                    mkdir($this->path . '/' . $folder, 0777, true);
+                }
             }
         }
     }
