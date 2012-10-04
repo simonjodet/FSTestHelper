@@ -30,6 +30,11 @@ class FSTestHelper
         return $this->path;
     }
 
+    public function delete($path)
+    {
+        unlink($this->path . $path);
+    }
+
     private function generateTemporaryPath($i)
     {
         $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
