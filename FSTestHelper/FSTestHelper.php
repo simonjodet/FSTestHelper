@@ -16,11 +16,11 @@ class FSTestHelper
     public function __construct()
     {
         $i = 0;
-        $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
+        $this->generateTemporaryPath($i);
         while (file_exists($this->path))
         {
             $i++;
-            $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
+            $this->generateTemporaryPath($i);
         }
         mkdir($this->path);
     }
@@ -28,6 +28,11 @@ class FSTestHelper
     public function getPath()
     {
         return $this->path;
+    }
+
+    private function generateTemporaryPath($i)
+    {
+        $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
     }
 }
 
