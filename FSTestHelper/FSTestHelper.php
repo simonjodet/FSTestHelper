@@ -109,14 +109,24 @@ class FSTestHelper
 
     public function create($items)
     {
-        foreach ($items['files'] as $file)
+        if (isset($items['files']))
         {
-            $pathinfo = pathinfo($file['path']);
-            if ($pathinfo['dirname'] != '.')
+            foreach ($items['files'] as $file)
             {
-                mkdir($this->path . '/' . $pathinfo['dirname'], 0777, true);
+                $pathinfo = pathinfo($file['path']);
+                if ($pathinfo['dirname'] != '.')
+                {
+                    mkdir($this->path . '/' . $pathinfo['dirname'], 0777, true);
+                }
+                file_put_contents($this->getPath() . '/' . $file['path'], $file['content']);
             }
-            file_put_contents($this->getPath() . '/' . $file['path'], $file['content']);
+        }
+        if (isset($items['folders']))
+        {
+            foreach ($items['folders'] as $folder)
+            {
+                mkdir($this->path . '/' . $folder, 0777, true);
+            }
         }
     }
 

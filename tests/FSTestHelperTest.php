@@ -164,5 +164,23 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_file', 'content');
         $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
+
+    public function test_create_creates_folders_at_the_correct_location()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->create(
+            array(
+                'folders' => array(
+                    'folder1',
+                    'folder2',
+                    'folder2/folder3'
+                )
+            )
+        );
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder1');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2/folder3');
+    }
+
 }
 
