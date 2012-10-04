@@ -60,18 +60,20 @@ class FSTestHelper
         {
             if (is_dir($path))
             {
-                foreach (glob($path . '/*') as $item)
+                $list = $this->itemize($path);
+                $list[] = $path;
+                rsort($list);
+                foreach ($list as $item)
                 {
                     if (is_dir($item))
                     {
-                        $this->delete($item);
+                        rmdir($item);
                     }
                     else
                     {
                         unlink($item);
                     }
                 }
-                rmdir($path);
             }
             else
             {

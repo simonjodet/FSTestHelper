@@ -95,6 +95,17 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertFileNotExists($path);
     }
 
+    public function test_delete_only_deletes_items_that_are_inside_its_test_folder()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path1 = $FSTestHelper->getPath();
+        touch($path1 . '/file');
+        $deletingFSTestHelper = new \FSTestHelper\FSTestHelper();
+        $deletingFSTestHelper->delete($path1 . '/file');
+
+        $this->assertFileExists($path1 . '/file');
+    }
+
     public function test_itemize_returns_a_recursive_and_sorted_list_of_the_given_path_content()
     {
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
