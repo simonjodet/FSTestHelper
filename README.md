@@ -4,25 +4,7 @@ FSTestHelper is a helper for tests involving the file system
 
 Usage example:
 
-    $FSTestHelper = new \FSTestHelper\FSTestHelper();
-    $FSTestHelper->createTree(
-        array(
-            'folders' => array(
-                'some_folder',
-                'other_folder'
-            ),
-            'files' => array(
-                array(
-                    'path' => 'some_file',
-                    'content' => 'content'
-                ),
-                array(
-                    'path' => 'test/other_file',
-                    'content' => 'content'
-                )
-            )
-        )
-    );
+TODO
 
 ## License
 

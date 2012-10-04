@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project version="2.0.0a8" title="FSTestHelper">
+  <file path="FSTestHelper.php" hash="4f62368f3ad749aa4382c8f818c10794" package="FSTestHelper">
+    <docblock line="2">
+      <description><![CDATA[Helper for tests involving the file system]]></description>
+      <long-description><![CDATA[]]></long-description>
+      <tag line="2" name="package" description="FSTestHelper"/>
+    </docblock>
+    <class final="false" abstract="false" namespace="FSTestHelper" line="12" package="Default">
+      <extends/>
+      <name>FSTestHelper</name>
+      <full_name>\FSTestHelper\FSTestHelper</full_name>
+      <docblock line="9">
+        <description><![CDATA[Helper for tests involving the file system]]></description>
+        <long-description><![CDATA[]]></long-description>
+      </docblock>
+      <property final="false" static="false" visibility="private" line="18" namespace="FSTestHelper" package="Default">
+        <name>$path</name>
+        <default><![CDATA[]]></default>
+        <docblock line="14">
+          <description><![CDATA[The test folder's path]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="14" name="var" description="" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </property>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="23" package="Default">
+        <name>__construct</name>
+        <full_name>__construct</full_name>
+        <docblock line="20">
+          <description><![CDATA[Constructor - Creates the unique test folder path]]></description>
+          <long-description><![CDATA[]]></long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="38" package="Default">
+        <name>__destruct</name>
+        <full_name>__destruct</full_name>
+        <docblock line="35">
+          <description><![CDATA[Destructor - Deletes the test folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="47" package="Default">
+        <name>__toString</name>
+        <full_name>__toString</full_name>
+        <docblock line="43">
+          <description><![CDATA[String serializer]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="43" name="return" description="The test folder's path" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="56" package="Default">
+        <name>getPath</name>
+        <full_name>getPath</full_name>
+        <docblock line="52">
+          <description><![CDATA[Test folder's path property getter]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="52" name="return" description="The test folder's path" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="68" package="Default">
+        <name>itemize</name>
+        <full_name>itemize</full_name>
+        <docblock line="61">
+          <description><![CDATA[Recursively list a folder INSIDE or OUTSIDE the test folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="61" name="param" description="- The folder path you want to list" type="string" variable="$path">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="61" name="return" description="The sorted folders and files list" type="array">
+            <type by_reference="false">array</type>
+          </tag>
+        </docblock>
+        <argument line="68">
+          <name>$path</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="88" package="Default">
+        <name>delete</name>
+        <full_name>delete</full_name>
+        <docblock line="83">
+          <description><![CDATA[Recursively list a folder INSIDE the test folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="83" name="param" description="- The path INSIDE the test folder you want to delete" type="string" variable="$path">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="88">
+          <name>$path</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="126" package="Default">
+        <name>copy</name>
+        <full_name>copy</full_name>
+        <docblock line="120">
+          <description><![CDATA[Recursively copy a folder that is INSIDE or OUTSIDE the test folder INSIDE the test folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="120" name="param" description="- The path INSIDE or OUTSIDE the test folder you want to copy" type="string" variable="$source">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="120" name="param" description="- The path INSIDE the test folder you want to copy to" type="string" variable="$destination">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="126">
+          <name>$source</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+        <argument line="126">
+          <name>$destination</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="FSTestHelper" line="159" package="Default">
+        <name>create</name>
+        <full_name>create</full_name>
+        <docblock line="154">
+          <description><![CDATA[Recursively create a folder and file structure INSIDE the test folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="154" name="param" description="- The array describing the files and folders you want to create inside the test folder" type="array" variable="$items">
+            <type by_reference="false">array</type>
+          </tag>
+        </docblock>
+        <argument line="159">
+          <name>$items</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="private" namespace="FSTestHelper" line="190" package="Default">
+        <name>generateTemporaryPath</name>
+        <full_name>generateTemporaryPath</full_name>
+        <docblock line="185">
+          <description><![CDATA[Generates a path inside the system's temporary folder]]></description>
+          <long-description><![CDATA[]]></long-description>
+          <tag line="185" name="param" description="- Discriminating part of the path" type="int" variable="$i">
+            <type by_reference="false">int</type>
+          </tag>
+        </docblock>
+        <argument line="190">
+          <name>$i</name>
+          <default><![CDATA[]]></default>
+          <type/>
+        </argument>
+      </method>
+    </class>
+  </file>
+  <package name="Default" full_name="Default"/>
+  <package name="FSTestHelper" full_name="FSTestHelper"/>
+  <namespace name="FSTestHelper" full_name="FSTestHelper"/>
+  <marker count="0">todo</marker>
+  <marker count="0">fixme</marker>
+  <deprecated count="0"/>
+</project>

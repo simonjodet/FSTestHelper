@@ -4,46 +4,188 @@ require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
 
 class FSTestHelperTest extends \PHPUnit_Framework_TestCase
 {
-    public function test___construct_uses_system_temp_folder_and_sets_temp_path()
+    public function test_constructor_returns_a_temporary_folder_in_the_system_temporary_folder()
     {
         $systemTempFolder = realpath(sys_get_temp_dir());
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $this->assertStringStartsWith($systemTempFolder, $FSTestHelper->getTemporaryPath());
+        $this->assertStringStartsWith($systemTempFolder . '/', $FSTestHelper->getPath());
     }
 
-    public function test_createTree_requires_an_array()
+    public function test_constructor_returns_a_unique_temporary_folder()
     {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed array passed to FSTestHelper::createTree()');
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTree('not_an_array');
+        $path1 = $FSTestHelper->getPath();
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path2 = $FSTestHelper->getPath();
+
+        $this->assertNotEquals($path1, $path2);
     }
 
-    public function test_createTree_requires_an_array_with_an_array_of_folders()
+    public function test_delete_deletes_files()
     {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed array passed to FSTestHelper::createTree()');
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTree(array(
-            'folders' => 'not an array'
-        ));
+        $path = $FSTestHelper->getPath();
+        touch($path . '/file1');
+        touch($path . '/file2');
+
+        $FSTestHelper->delete('/file1');
+        $FSTestHelper->delete('/file2');
+
+        $this->assertFileNotExists($path . '/file1');
+        $this->assertFileNotExists($path . '/file2');
     }
 
-    public function test_createTree_requires_an_array_with_an_array_of_files()
+    public function test_delete_deletes_folders()
     {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed array passed to FSTestHelper::createTree()');
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTree(
-            array('folders' => array())
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder2');
+
+        $FSTestHelper->delete('/folder1');
+        $FSTestHelper->delete('/folder2');
+
+        $this->assertFileNotExists($path . '/folder1');
+        $this->assertFileNotExists($path . '/folder2');
+    }
+
+    public function test_delete_is_silent_if_given_path_does_not_exist()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+
+        $FSTestHelper->delete('/folder1');
+        $FSTestHelper->delete('/file1');
+
+        $this->assertFileNotExists($path . '/folder1');
+        $this->assertFileNotExists($path . '/file1');
+    }
+
+    public function test_delete_empties_folders_before_deleting_them()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder1/folder2');
+        touch($path . '/folder1/file1');
+        touch($path . '/folder1/folder2/file2');
+
+        $FSTestHelper->delete('/folder1');
+
+        $this->assertFileNotExists($path . '/folder1');
+    }
+
+    public function test_destructor_deletes_the_temporary_test_path()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder1/folder2');
+        touch($path . '/folder1/file1');
+        touch($path . '/folder1/folder2/file2');
+
+        unset($FSTestHelper);
+
+        $this->assertFileNotExists($path);
+    }
+
+    public function test_delete_only_deletes_items_that_are_inside_its_test_folder()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path1 = $FSTestHelper->getPath();
+        touch($path1 . '/file');
+        $deletingFSTestHelper = new \FSTestHelper\FSTestHelper();
+        $deletingFSTestHelper->delete($path1 . '/file');
+
+        $this->assertFileExists($path1 . '/file');
+    }
+
+    public function test_itemize_returns_a_recursive_and_sorted_list_of_the_given_path_content()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder1/folder2');
+        touch($path . '/folder1/file1');
+        touch($path . '/folder1/folder2/file2');
+
+        $listingFSTestHelper = new \FSTestHelper\FSTestHelper();
+
+        $this->assertEquals(array(
+                $path . '/folder1',
+                $path . '/folder1/file1',
+                $path . '/folder1/folder2',
+                $path . '/folder1/folder2/file2'
+            ),
+            $listingFSTestHelper->itemize($path));
+    }
+
+    public function test_copy_recursively_copies_a_folder_to_the_set_destination()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $source = $FSTestHelper->getPath();
+        mkdir($source . '/folder1');
+        mkdir($source . '/folder1/folder2');
+        touch($source . '/folder1/file1');
+        touch($source . '/folder1/folder2/file2');
+
+        $copyingFSTestHelper = new \FSTestHelper\FSTestHelper();
+        $copyingFSTestHelper->copy($source, '/target');
+        $target = $copyingFSTestHelper->getPath() . '/target';
+
+        $this->assertFileExists($target . '/folder1');
+        $this->assertFileExists($target . '/folder1/file1');
+        $this->assertFileExists($target . '/folder1/folder2');
+        $this->assertFileExists($target . '/folder1/folder2/file2');
+    }
+
+    public function test_create_creates_files_at_the_correct_location_with_the_correct_content()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->create(
+            array(
+                'files' => array(
+                    array(
+                        'path' => 'some_file',
+                        'content' => 'content'
+                    ),
+                    array(
+                        'path' => 'folder1/folder2/some_other_file',
+                        'content' => 'other_content'
+                    )
+                )
+            )
         );
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_file', 'content');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
 
-    public function test_createTree_creates_the_tree_correctly()
+    public function test_create_creates_folders_at_the_correct_location()
     {
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTree(
+        $FSTestHelper->create(
             array(
                 'folders' => array(
-                    'some_folder',
-                    'other_folder'
+                    'folder1',
+                    'folder2',
+                    'folder2/folder3'
+                )
+            )
+        );
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder1');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2/folder3');
+    }
+
+    public function test_create_creates_files_and_folders_at_the_same_time()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $FSTestHelper->create(
+            array(
+                'folders' => array(
+                    'folder1',
+                    'folder2',
+                    'folder2/folder3'
                 ),
                 'files' => array(
                     array(
@@ -51,236 +193,23 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
                         'content' => 'content'
                     ),
                     array(
-                        'path' => 'test/other_file',
-                        'content' => 'content'
+                        'path' => 'folder1/folder2/some_other_file',
+                        'content' => 'other_content'
                     )
                 )
             )
         );
-        $temporaryPath = $FSTestHelper->getTemporaryPath();
-
-        $this->assertFileExists($temporaryPath . '/some_folder');
-        $this->assertFileExists($temporaryPath . '/other_folder');
-        $this->assertStringEqualsFile($temporaryPath . '/some_file', 'content');
-        $this->assertStringEqualsFile($temporaryPath . '/test/other_file', 'content');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder1');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2');
+        $this->assertFileExists($FSTestHelper->getPath() . '/folder2/folder3');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/some_file', 'content');
+        $this->assertStringEqualsFile($FSTestHelper->getPath() . '/folder1/folder2/some_other_file', 'other_content');
     }
 
-
-    public function test_generateUniqueTemporaryPath_always_returns_the_same_path()
+    public function test___toString_returns_the_path()
     {
         $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $path1 = $FSTestHelper->generateUniqueTemporaryPath(false);
-
-        $this->assertEquals($path1, $FSTestHelper->generateUniqueTemporaryPath());
-    }
-
-    public function test_generateUniqueTemporaryPath_returns_folder_with_expected_name()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $path = $FSTestHelper->generateUniqueTemporaryPath();
-
-        $this->assertRegExp('#^(.*)/test_\d*$#', $path);
-    }
-
-    public function test_createFolder_creates_the_passed_folder()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $testFolderPath = $FSTestHelper->createFolder('test_folder');
-        $this->assertFileExists($testFolderPath);
-    }
-
-    public function test_createFolder_creates_the_passed_folder_recursively()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $testFolderPath = $FSTestHelper->createFolder('test_folder/test_folder');
-        $this->assertFileExists($testFolderPath);
-    }
-
-    public function test_createFile_throws_exception_if_file_is_not_an_array()
-    {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed file description passed to FSTestHelper::createFile()');
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createFile('not_an_array');
-    }
-
-    public function test_createFile_throws_exception_if_file_does_not_have_path()
-    {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed file description passed to FSTestHelper::createFile()');
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createFile(array());
-    }
-
-    public function test_createFile_throws_exception_if_file_does_not_have_content()
-    {
-        $this->setExpectedException('\FSTestHelper\Exception', 'Malformed file description passed to FSTestHelper::createFile()');
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createFile(
-            array(
-                'path' => 'some name'
-            )
-        );
-    }
-
-    public function test_createFile_creates_file_with_correct_content_at_correct_path()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $path = $FSTestHelper->createFile(
-            array(
-                'path' => 'some_name',
-                'content' => 'some_content'
-            )
-        );
-        $this->assertStringEqualsFile($path, 'some_content');
-
-        $path = $FSTestHelper->createFile(
-            array(
-                'path' => 'path/some_name',
-                'content' => 'some_content'
-            )
-        );
-        $this->assertStringEqualsFile($path, 'some_content');
-    }
-
-    public function test___destruct_deletes_all_files_and_folders()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $path1 = $FSTestHelper->createFile(
-            array(
-                'path' => 'some_name',
-                'content' => 'some_content'
-            )
-        );
-        $path2 = $FSTestHelper->createFile(
-            array(
-                'path' => 'path/some_name',
-                'content' => 'some_content'
-            )
-        );
-
-        unset($FSTestHelper);
-
-        $this->assertFileNotExists($path1);
-        $this->assertFileNotExists($path2);
-    }
-
-    public function test___toString_method_returns_the_temporary_path()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-
-        $this->assertEquals($FSTestHelper->getTemporaryPath(), strval($FSTestHelper));
-    }
-
-    public function test_createTreeFromJson_creates_the_tree_correctly()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTreeFromJson('
-        {
-            "folders":[
-                "some_folder",
-                "other_folder"
-            ],
-            "files":[
-                {
-                    "path":"some_file",
-                    "content":"content"
-                },
-                {
-                    "path":"test/other_file",
-                    "content":"content"
-                }
-            ]
-        }
-        ');
-        $temporaryPath = $FSTestHelper->getTemporaryPath();
-
-        $this->assertFileExists($temporaryPath . '/some_folder');
-        $this->assertFileExists($temporaryPath . '/other_folder');
-        $this->assertStringEqualsFile($temporaryPath . '/some_file', 'content');
-        $this->assertStringEqualsFile($temporaryPath . '/test/other_file', 'content');
-    }
-
-    public function test_createTreeFromJson_throws_an_exception_if_passed_invalid_JSON()
-    {
-        $this->setExpectedException(
-            'FSTestHelper\Exception', 'Invalid JSON'
-        );
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createTreeFromJson('invalid json');
-    }
-
-    public function test_importFolderTree_returns_the_correct_JSON_object()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $tree = array(
-            'folders' => array(
-                'other_folder',
-                'some_folder'
-            ),
-            'files' => array(
-                array(
-                    'path' => 'some_file',
-                    'content' => 'content'
-                ),
-                array(
-                    'path' => 'test/other_file',
-                    'content' => 'content'
-                )
-            )
-        );
-        $FSTestHelper->createTree($tree);
-        $temporaryPath = $FSTestHelper->getTemporaryPath();
-
-        $this->assertEquals($tree, json_decode($FSTestHelper->importFolderTree($temporaryPath), true));
-    }
-
-    public function test_cloneTree_duplicates_the_tree_correctly()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $tree = array(
-            'folders' => array(
-                'other_folder',
-                'some_folder'
-            ),
-            'files' => array(
-                array(
-                    'path' => 'some_file',
-                    'content' => 'content'
-                ),
-                array(
-                    'path' => 'test/other_file',
-                    'content' => 'content'
-                )
-            )
-        );
-        $FSTestHelper->createTree($tree);
-        $temporaryPath = $FSTestHelper->getTemporaryPath();
-
-        $FSTestHelper2 = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper2->cloneTree($temporaryPath);
-
-        $this->assertEquals($tree, json_decode($FSTestHelper2->importFolderTree($FSTestHelper2->getTemporaryPath()), true));
-    }
-
-    public function test_deleteFolder_deletes_all_files_and_folders()
-    {
-        $FSTestHelper = new \FSTestHelper\FSTestHelper();
-        $FSTestHelper->createFile(
-            array(
-                'path' => 'path/some_name',
-                'content' => 'some_content'
-            )
-        );
-        $FSTestHelper->createFile(
-            array(
-                'path' => 'path/path/some_name',
-                'content' => 'some_content'
-            )
-        );
-
-        $FSTestHelper->deleteFolder('/path');
-
-        $this->assertFileNotExists('/path/some_name');
-        $this->assertFileNotExists('/path');
+        $this->assertEquals($FSTestHelper->getPath(), strval($FSTestHelper));
     }
 
 }

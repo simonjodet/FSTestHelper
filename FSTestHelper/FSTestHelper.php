@@ -12,295 +12,183 @@ namespace FSTestHelper;
 class FSTestHelper
 {
     /**
-     * @var string The system temp folder
+     * The test folder's path
+     * @var string
      */
-    private $systemTempFolder;
-    /**
-     * @var string Object unique temporary path
-     */
-    private $temporaryPath;
+    private $path;
 
     /**
-     * Data container during import
-     * @var array
-     */
-    private $importData = array();
-
-    /**
-     * Constructor - Get the system temp folder
+     * Constructor - Creates the unique test folder path
      */
     public function __construct()
     {
-        $this->systemTempFolder = realpath(sys_get_temp_dir());
-        $this->temporaryPath = $this->generateUniqueTemporaryPath();
+        $i = 0;
+        $this->generateTemporaryPath($i);
+        while (file_exists($this->path))
+        {
+            $i++;
+            $this->generateTemporaryPath($i);
+        }
+        mkdir($this->path);
     }
 
     /**
-     * Destructor - Deletes all temporary items
+     * Destructor - Deletes the test folder
      */
     public function __destruct()
     {
-        if (!is_null($this->temporaryPath))
-        {
-            $this->deleteFolder('');
-        }
+        $this->delete($this->path);
     }
 
     /**
-     * String serialization return the temporary path
-     * @return string The temporary path
+     * String serializer
+     * @return string The test folder's path
      */
     public function __toString()
     {
-        return strval($this->getTemporaryPath());
+        return $this->path;
     }
 
     /**
-     * Create a file and folder tree
-     *
-     * Example:
-     * $FSTestHelper = new \FSTestHelper\FSTestHelper();
-     * $FSTestHelper->createTree(
-     *   array(
-     *     'folders' => array(
-     *       'some_folder',
-     *       'other_folder'
-     *     ),
-     *     'files' => array(
-     *       array(
-     *         'path' => 'some_file',
-     *         'content' => 'content'
-     *       ),
-     *       array(
-     *         'path' => 'test/other_file',
-     *         'content' => 'content'
-     *       )
-     *     )
-     *   )
-     * );
-     *
-     * @param $tree array describing the file tree- Check the example above
-     *
-     * @throws Exception
+     * Test folder's path property getter
+     * @return string The test folder's path
      */
-    public function createTree($tree)
+    public function getPath()
     {
-        if (!is_array($tree) || !isset($tree['folders']) || !is_array($tree['folders']) || !isset($tree['files']) || !is_array($tree['files']))
-        {
-            throw new Exception('Malformed array passed to FSTestHelper::createTree()');
-        }
-
-        foreach ($tree['folders'] as $folder)
-        {
-            $this->createFolder($folder);
-        }
-
-        foreach ($tree['files'] as $file)
-        {
-            $this->createFile($file);
-        }
+        return $this->path;
     }
 
     /**
-     * @param $json JSON object representing the tree
+     * Recursively list a folder INSIDE or OUTSIDE the test folder
      *
-     * @throws Exception
+     * @param string $path - The folder path you want to list
+     *
+     * @return array The sorted folders and files list
      */
-    public function createTreeFromJson($json)
+    public function itemize($path)
     {
-        $tree = json_decode($json, true);
-        if (json_last_error() != JSON_ERROR_NONE)
+        $items = array();
+        foreach (glob($path . '/*') as $item)
         {
-            throw new Exception('Invalid JSON');
-        }
-
-        $this->createTree($tree);
-    }
-
-    /**
-     * @return string The generated unique temporary path
-     */
-    public function generateUniqueTemporaryPath()
-    {
-        if (is_null($this->temporaryPath))
-        {
-            $this->temporaryPath = $this->generateRandomPath();
-            while (file_exists($this->temporaryPath))
+            $items[] = $item;
+            if (is_dir($item))
             {
-                $this->temporaryPath = $this->generateRandomPath();
+                $items = array_merge($items, $this->itemize($item));
             }
-            mkdir($this->temporaryPath);
         }
-        return $this->temporaryPath;
+        sort($items);
+        return $items;
     }
 
     /**
-     * Create a folder
+     * Recursively list a folder INSIDE the test folder
      *
-     * @param string $folder
-     *
-     * @return string
+     * @param string $path - The path INSIDE the test folder you want to delete
      */
-    public function createFolder($folder)
+    public function delete($path)
     {
-        $path = $this->generateUniqueTemporaryPath() . '/' . $folder;
-        mkdir($path, 0777, true);
-        return $path;
-    }
-
-    /**
-     * Create a JSON object of a real folder tree
-     *
-     * @param string $location
-     *
-     * @return string JSON object
-     */
-    public function importFolderTree($location)
-    {
-        $this->importData['location'] = $location;
-        $this->importData['folders'] = array();
-        $this->importData['files'] = array();
-        $this->listFiles($location);
-        return json_encode(array(
-            'folders' => $this->importData['folders'],
-            'files' => $this->importData['files']
-        ));
-    }
-
-
-    /**
-     * Cloning existing tree to temporary path
-     *
-     * @param $location
-     */
-    public function cloneTree($location)
-    {
-        $this->importData['location'] = $location;
-        $this->importData['folders'] = array();
-        $this->importData['files'] = array();
-        $this->listFiles($location);
-        $this->createTree(array(
-            'folders' => $this->importData['folders'],
-            'files' => $this->importData['files']
-        ));
-    }
-
-    /**
-     * Create a file
-     *
-     * Example:
-     * $FSTestHelper = new \FSTestHelper\FSTestHelper();
-     * $FSTestHelper->createFile(
-     *   array(
-     *     'path'=>'file_path',
-     *     'content'=>'file_content'
-     *   )
-     * );
-     *
-     * @param array $file
-     *
-     * @return string
-     * @throws Exception
-     */
-    public function createFile($file)
-    {
-        if (!is_array($file) || !isset($file['path']) || !isset($file['content']))
+        if (strpos(realpath($path), realpath($this->path)) !== 0)
         {
-            throw new Exception('Malformed file description passed to FSTestHelper::createFile()');
+            $path = $this->path . '/' . $path;
         }
-        $file_path_info = pathinfo($file['path']);
-        $path = $this->generateUniqueTemporaryPath() . '/' . $file_path_info['dirname'];
-        if (!file_exists($path))
+        if (file_exists($path))
         {
-            mkdir($path, 0777, true);
-        }
-
-        $path = $path . '/' . $file_path_info['basename'];
-        file_put_contents($path, $file['content']);
-        return $path;
-    }
-
-    /**
-     * Recursive listing method used for import
-     *
-     * @param $location
-     */
-    private function listFiles($location)
-    {
-        $files = array();
-        $items = glob($location . '/*');
-        if (is_array($items) && count($items) > 0)
-        {
-            foreach ($items as $item)
+            if (is_dir($path))
             {
-                if (is_dir($item))
+                $list = $this->itemize($path);
+                $list[] = $path;
+                rsort($list);
+                foreach ($list as $item)
                 {
-                    $this->listFiles($item);
+                    if (is_dir($item))
+                    {
+                        rmdir($item);
+                    }
+                    else
+                    {
+                        unlink($item);
+                    }
                 }
-                else
-                {
-                    $this->importData['files'][] = array(
-                        'path' => ltrim(str_replace(realpath($this->importData['location']), '', realpath($item)), DIRECTORY_SEPARATOR),
-                        'content' => file_get_contents(realpath($item))
-                    );
-                }
-            }
-        }
-        else
-        {
-            if (realpath($location) != realpath($this->importData['location']))
-            {
-                $this->importData['folders'][] = ltrim(str_replace(realpath($this->importData['location']), '', realpath($location)), DIRECTORY_SEPARATOR);
-            }
-        }
-    }
-
-    /**
-     * @return string Get the generated temporary path
-     */
-    public function getTemporaryPath()
-    {
-        return $this->temporaryPath;
-    }
-
-    /**
-     * @return string
-     */
-    private function generateRandomPath()
-    {
-        return $this->systemTempFolder . '/test_' . rand(0, 1000000);
-    }
-
-    /**
-     * Recursively deletes the given folder
-     *
-     * @param $path
-     */
-    public function deleteFolder($path)
-    {
-        if (strpos(realpath($path), realpath($this->getTemporaryPath())) !== 0)
-        {
-            $path = $this->getTemporaryPath() . '/' . $path;
-        }
-        foreach (glob($path . '/*') as $file)
-        {
-            if (is_dir($file))
-            {
-                $this->deleteFolder($file);
             }
             else
             {
-                unlink($file);
+                unlink($path);
             }
         }
-        rmdir($path);
     }
-}
 
-/**
- * FSTestHelper Exception class
- */
-class Exception extends \Exception
-{
+    /**
+     * Recursively copy a folder that is INSIDE or OUTSIDE the test folder INSIDE the test folder
+     *
+     * @param string $source - The path INSIDE or OUTSIDE the test folder you want to copy
+     * @param string $destination - The path INSIDE the test folder you want to copy to
+     */
+    public function copy($source, $destination)
+    {
+        $list = $this->itemize($source);
+        if (strpos(realpath($destination), realpath($this->path)) !== 0)
+        {
+            $destination = $this->path . '/' . $destination;
+        }
+        if (!file_exists($destination))
+        {
+            mkdir($destination);
+        }
+        foreach ($list as $item)
+        {
+            $relative_path = ltrim(str_replace(realpath($source), '', realpath($item)), '/');
+            if (is_dir($item))
+            {
+                mkdir($destination . '/' . $relative_path);
+            }
+            else
+            {
+                if (realpath($item) != '')
+                {
+                    copy($item, $destination . '/' . $relative_path);
+                }
+            }
+        }
+    }
 
+    /**
+     * Recursively create a folder and file structure INSIDE the test folder
+     *
+     * @param array $items - The array describing the files and folders you want to create inside the test folder
+     */
+    public function create($items)
+    {
+        if (isset($items['files']))
+        {
+            foreach ($items['files'] as $file)
+            {
+                $pathinfo = pathinfo($file['path']);
+                if ($pathinfo['dirname'] != '.' && !file_exists($this->path . '/' . $pathinfo['dirname']))
+                {
+                    mkdir($this->path . '/' . $pathinfo['dirname'], 0777, true);
+                }
+                file_put_contents($this->getPath() . '/' . $file['path'], $file['content']);
+            }
+        }
+        if (isset($items['folders']))
+        {
+            foreach ($items['folders'] as $folder)
+            {
+                if (!file_exists($this->path . '/' . $folder))
+                {
+                    mkdir($this->path . '/' . $folder, 0777, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Generates a path inside the system's temporary folder
+     *
+     * @param int $i - Discriminating part of the path
+     */
+    private function generateTemporaryPath($i)
+    {
+        $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
+    }
 }
