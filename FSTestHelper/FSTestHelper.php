@@ -35,6 +35,21 @@ class FSTestHelper
         return $this->path;
     }
 
+    public function itemize($path)
+    {
+        $items = array();
+        foreach (glob($path . '/*') as $item)
+        {
+            $items[] = $item;
+            if (is_dir($item))
+            {
+                $items = array_merge($items, $this->itemize($item));
+            }
+        }
+        sort($items);
+        return $items;
+    }
+
     public function delete($path)
     {
         if (strpos(realpath($path), realpath($this->path)) !== 0)

@@ -4,8 +4,8 @@ require_once __DIR__ . '/../FSTestHelper/FSTestHelper.php';
 
 
 /**
+ * TODO: Add a method that clones a folder and its content recursively
  * TODO: Add a method that recursively create a path
- * TODO: Add a method that recursively lists folders and files
  * TODO: Add a method that creates folders and files based on an array or JSON string to a specified location
  */
 class FSTestHelperTest extends \PHPUnit_Framework_TestCase
@@ -93,6 +93,26 @@ class FSTestHelperTest extends \PHPUnit_Framework_TestCase
         unset($FSTestHelper);
 
         $this->assertFileNotExists($path);
+    }
+
+    public function test_itemize_returns_a_recursive_and_sorted_list_of_the_given_path_content()
+    {
+        $FSTestHelper = new \FSTestHelper\FSTestHelper();
+        $path = $FSTestHelper->getPath();
+        mkdir($path . '/folder1');
+        mkdir($path . '/folder1/folder2');
+        touch($path . '/folder1/file1');
+        touch($path . '/folder1/folder2/file2');
+
+        $listingFSTestHelper = new \FSTestHelper\FSTestHelper();
+
+        $this->assertEquals(array(
+                $path . '/folder1',
+                $path . '/folder1/file1',
+                $path . '/folder1/folder2',
+                $path . '/folder1/folder2/file2'
+            ),
+            $listingFSTestHelper->itemize($path));
     }
 }
 
