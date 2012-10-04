@@ -82,16 +82,34 @@ class FSTestHelper
         }
     }
 
+    public function copy($source, $destination)
+    {
+        $list = $this->itemize($source);
+        if (strpos(realpath($destination), realpath($this->path)) !== 0)
+        {
+            $destination = $this->path . '/' . $destination;
+        }
+        if (!file_exists($destination))
+        {
+            mkdir($destination);
+        }
+        foreach ($list as $item)
+        {
+            $relative_path = ltrim(str_replace(realpath($source), '', realpath($item)), '/');
+            if (is_dir($item))
+            {
+                mkdir($destination . '/' . $relative_path);
+            }
+            else
+            {
+                copy($item, $destination . '/' . $relative_path);
+            }
+        }
+
+    }
+
     private function generateTemporaryPath($i)
     {
         $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
     }
-}
-
-/**
- * FSTestHelper Exception class
- */
-class Exception extends \Exception
-{
-
 }
