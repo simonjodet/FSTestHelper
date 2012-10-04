@@ -105,7 +105,14 @@ class FSTestHelper
                 copy($item, $destination . '/' . $relative_path);
             }
         }
+    }
 
+    public function create($items)
+    {
+        foreach ($items['files'] as $file)
+        {
+            file_put_contents($this->getPath() . '/' . $file['path'], $file['content']);
+        }
     }
 
     private function generateTemporaryPath($i)
