@@ -11,8 +11,15 @@ namespace FSTestHelper;
  */
 class FSTestHelper
 {
+    /**
+     * The test folder's path
+     * @var string
+     */
     private $path;
 
+    /**
+     * Constructor - Creates the unique test folder path
+     */
     public function __construct()
     {
         $i = 0;
@@ -25,21 +32,39 @@ class FSTestHelper
         mkdir($this->path);
     }
 
+    /**
+     * Destructor - Deletes the test folder
+     */
     public function __destruct()
     {
         $this->delete($this->path);
     }
 
+    /**
+     * String serializer
+     * @return string The test folder's path
+     */
     public function __toString()
     {
         return $this->path;
     }
 
+    /**
+     * Test folder's path property getter
+     * @return string The test folder's path
+     */
     public function getPath()
     {
         return $this->path;
     }
 
+    /**
+     * Recursively list a folder INSIDE or OUTSIDE the test folder
+     *
+     * @param string $path - The folder path you want to list
+     *
+     * @return array The sorted folders and files list
+     */
     public function itemize($path)
     {
         $items = array();
@@ -55,6 +80,11 @@ class FSTestHelper
         return $items;
     }
 
+    /**
+     * Recursively list a folder INSIDE the test folder
+     *
+     * @param string $path - The path INSIDE the test folder you want to delete
+     */
     public function delete($path)
     {
         if (strpos(realpath($path), realpath($this->path)) !== 0)
@@ -87,6 +117,12 @@ class FSTestHelper
         }
     }
 
+    /**
+     * Recursively copy a folder that is INSIDE or OUTSIDE the test folder INSIDE the test folder
+     *
+     * @param string $source - The path INSIDE or OUTSIDE the test folder you want to copy
+     * @param string $destination - The path INSIDE the test folder you want to copy to
+     */
     public function copy($source, $destination)
     {
         $list = $this->itemize($source);
@@ -115,6 +151,11 @@ class FSTestHelper
         }
     }
 
+    /**
+     * Recursively create a folder and file structure INSIDE the test folder
+     *
+     * @param array $items - The array describing the files and folders you want to create inside the test folder
+     */
     public function create($items)
     {
         if (isset($items['files']))
@@ -141,6 +182,11 @@ class FSTestHelper
         }
     }
 
+    /**
+     * Generates a path inside the system's temporary folder
+     *
+     * @param int $i - Discriminating part of the path
+     */
     private function generateTemporaryPath($i)
     {
         $this->path = realpath(sys_get_temp_dir()) . '/test_' . $i;
