@@ -93,27 +93,7 @@ class FSTestHelper
         }
         if (file_exists($path))
         {
-            if (is_dir($path))
-            {
-                $list = $this->itemize($path);
-                $list[] = $path;
-                rsort($list);
-                foreach ($list as $item)
-                {
-                    if (is_dir($item))
-                    {
-                        rmdir($item);
-                    }
-                    else
-                    {
-                        unlink($item);
-                    }
-                }
-            }
-            else
-            {
-                unlink($path);
-            }
+            exec('rm -rf ' . $path);
         }
     }
 
